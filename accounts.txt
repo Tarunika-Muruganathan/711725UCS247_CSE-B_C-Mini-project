@@ -1,0 +1,4 @@
+Acct  Last Name       First Name Gender  DOB         Nationality       Balance
+1     John            Joe        U       @k@                            -0.97
+54594749                                                                    0.00
+49    VM,             Tarunika,          @                                0.00
