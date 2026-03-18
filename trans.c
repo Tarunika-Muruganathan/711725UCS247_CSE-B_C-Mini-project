@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#define ADMIN_USER "admin"
+#define ADMIN_PASS "1234"
 // clientData structure definition
 struct clientData
 {
@@ -54,10 +56,41 @@ int isValidDOB(char *dob)
     return 1;
 }
 
+int login()
+{
+    char user[20], pass[20];
+
+    printf("\n--- Admin Login ---\n");
+
+    printf("Username: ");
+    scanf("%19s", user);
+
+    printf("Password: ");
+    scanf("%19s", pass);
+
+    if (strcmp(user, ADMIN_USER) == 0 && strcmp(pass, ADMIN_PASS) == 0)
+    {
+        printf("Login successful!\n");
+        return 1;
+    }
+    else
+    {
+        printf("Invalid credentials!\n");
+        return 0;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     FILE *cfPtr;         // credit.dat file pointer
     unsigned int choice; // user's choice
+
+    // LOGIN CHECK (ADD HERE)
+    if (!login())
+    {
+        printf("Access denied!\n");
+        return 0;
+    }
 
     // fopen opens the file; exits if file cannot be opened
     if ((cfPtr = fopen("credit.dat", "rb+")) == NULL)
