@@ -32,6 +32,8 @@
     void clearBuffer();
     void deposit(FILE *fPtr);
     void withdraw(FILE *fPtr);
+    void initializeFile();
+    void transfer(FILE *fPtr);
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -98,8 +100,8 @@
         // fopen opens the file; exits if file cannot be opened
         if ((cfPtr = fopen("credit.dat", "rb+")) == NULL)
         {
-            printf("%s: File could not be opened.\n", argv[0]);
-            exit(-1);
+            initializeFile();
+            cfPtr = fopen("credit.dat", "rb+");
         }
 
         // enable user to specify action
@@ -142,6 +144,10 @@
             // withdraw money
             case 9:
                 withdraw(cfPtr);
+                break;
+            // transfer money
+            case 10:
+                transfer(cfPtr);
                 break;
             } // end switch
         }     // end while
@@ -370,6 +376,93 @@
         printf("Withdrawal successful! Remaining balance: %.2f\n", client.balance);
     }
 
+    void transfer(FILE *fPtr)
+    {
+        unsigned int fromAcc, toAcc;
+        double amount;
+        
+        struct clientData sender = {0}, receiver = {0};
+        
+        printf("Enter sender account number: ");
+        scanf("%u", &fromAcc);
+
+        printf("Enter receiver account number: ");
+        scanf("%u", &toAcc);
+
+        if (fromAcc < 1 || fromAcc > 100 || toAcc < 1 || toAcc > 100)
+        {
+            printf("Invalid account number!\n");
+            return;
+        }
+
+        if (fromAcc == toAcc)
+        {
+            printf("Cannot transfer to the same account!\n");
+            return;
+        }
+
+        // -------- READ SENDER --------
+        fseek(fPtr, (fromAcc - 1) * sizeof(struct clientData), SEEK_SET);
+        fread(&sender, sizeof(struct clientData), 1, fPtr);
+
+        if (sender.acctNum == 0)
+        {
+            printf("Sender account not found!\n");
+            return;
+        }   
+
+        // -------- PIN CHECK --------
+        int enteredPin;
+        printf("Enter sender PIN: ");
+        scanf("%d", &enteredPin);
+
+        if (enteredPin != sender.pin)
+        {
+            printf("Incorrect PIN!\n");
+            return;
+        }
+
+        // -------- READ RECEIVER --------
+        fseek(fPtr, (toAcc - 1) * sizeof(struct clientData), SEEK_SET);
+        fread(&receiver, sizeof(struct clientData), 1, fPtr);
+
+        if (receiver.acctNum == 0)
+        {
+            printf("Receiver account not found!\n");
+            return;
+        }
+
+        // -------- AMOUNT --------
+        printf("Enter amount to transfer: ");
+        scanf("%lf", &amount);
+
+        if (amount <= 0)
+        {
+            printf("Invalid amount!\n");
+            return;
+        }
+
+        if (sender.balance < amount)
+        {
+            printf("Insufficient balance!\n");
+            return;
+        }
+        // -------- UPDATE BALANCES --------
+        sender.balance -= amount;
+        receiver.balance += amount;
+
+        // -------- WRITE BACK SENDER --------
+        fseek(fPtr, (fromAcc - 1) * sizeof(struct clientData), SEEK_SET);
+        fwrite(&sender, sizeof(struct clientData), 1, fPtr);
+
+        // -------- WRITE BACK RECEIVER --------
+        fseek(fPtr, (toAcc - 1) * sizeof(struct clientData), SEEK_SET);
+        fwrite(&receiver, sizeof(struct clientData), 1, fPtr);
+
+        printf("Transfer successful!\n");
+        printf("Sender new balance: %.2f\n", sender.balance);
+    }
+
     // delete an existing record
     void deleteRecord(FILE *fPtr)
     {
@@ -555,6 +648,26 @@
         }
     }
 
+    void initializeFile()
+    {
+        FILE *fp = fopen("credit.dat", "wb");
+        if (fp == NULL)
+        {
+            printf("Error creating file.\n");
+            return;
+        }
+
+        struct clientData blank = {0, "", "", "", "", "", 0.0, 0};
+
+        for (int i = 0; i < 100; i++)
+        {
+            fwrite(&blank, sizeof(struct clientData), 1, fp);
+        }
+
+        fclose(fp);
+        printf("File initialized successfully.\n");
+    }
+
     // enable user to input menu choice
     unsigned int enterChoice(void)
     {
@@ -570,7 +683,8 @@
                     "6 - search an account\n"
                     "7 - display all accounts\n"
                     "8 - deposit money\n"
-                    "9 - withdraw money\n? ");
+                    "9 - withdraw money\n"
+                    "10 - transfer money\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
