@@ -5,6 +5,7 @@
     #include <stdlib.h>
     #include <string.h>
     #include <ctype.h>
+    #include <time.h>
     #define ADMIN_USER "admin"
     #define ADMIN_PASS "1234"
     // clientData structure definition
@@ -685,23 +686,32 @@
 
     void logTransaction(char *type, unsigned int acc1, unsigned int acc2, double amount, double balance)
     {
-        FILE *fp = fopen("transaction.txt", "a"); // append mode
+        FILE *fp = fopen("transaction.txt", "a");
 
         if (fp == NULL)
-        {
-            printf("Error opening transaction file!\n");
-            return;
+            {
+                printf("Error opening transaction file!\n");
+                return;
         }
 
+        // -------- GET CURRENT TIME --------
+        time_t now;
+        time(&now);
+        struct tm *local = localtime(&now);
+
+        char timeStr[50];
+        strftime(timeStr, sizeof(timeStr), "%d/%m/%Y %H:%M:%S", local);
+
+        // -------- WRITE TO FILE --------
         if (strcmp(type, "TRANSFER") == 0)
         {
-            fprintf(fp, "TRANSFER: From Acc %u -> To Acc %u | Amount: %.2f\n",
-                acc1, acc2, amount);
+            fprintf(fp, "[%s] TRANSFER: From Acc %u -> To Acc %u | Amount: %.2f\n",
+                timeStr, acc1, acc2, amount);
         }
         else
         {
-            fprintf(fp, "%s: Acc %u | Amount: %.2f | Balance: %.2f\n",
-                type, acc1, amount, balance);
+            fprintf(fp, "[%s] %s: Acc %u | Amount: %.2f | Balance: %.2f\n",
+                timeStr, type, acc1, amount, balance);
         }
 
         fclose(fp);
@@ -719,14 +729,14 @@
 
         char line[200];
 
-        printf("\n------ TRANSACTION HISTORY ------\n");
+        printf("\n=========== TRANSACTION HISTORY ===========\n");
 
         while (fgets(line, sizeof(line), fp) != NULL)
         {
-            printf("%s", line);
+            printf("%s", line);   // already includes time
         }
 
-        printf("------ END OF HISTORY ------\n");
+        printf("=========== END OF HISTORY ===========\n");
 
         fclose(fp);
     }
@@ -748,11 +758,10 @@
         printf("Enter account number: ");
         scanf("%u", &acc);
 
-        printf("\n--- Transactions for Account %u ---\n", acc);
+        printf("\n===== Transactions for Account %u =====\n", acc);
 
         while (fgets(line, sizeof(line), fp) != NULL)
         {
-            // check if account number exists in line
             char search[20];
             sprintf(search, "Acc %u", acc);
 
@@ -764,19 +773,19 @@
 
             if (strstr(line, search) || strstr(line, searchFrom) || strstr(line, searchTo))
             {
-                printf("%s", line);
+                printf("%s", line);   // includes timestamp
                 found = 1;
-            }
-
-            if (!found)
-            {
-                printf("No transactions found for this account.\n");
             }
         }
 
-            printf("--- End ---\n");
+        if (!found)
+        {
+            printf("No transactions found for this account.\n");
+        }
+    
+        printf("===== END =====\n");
 
-            fclose(fp);
+        fclose(fp);
     }
 
     // enable user to input menu choice
