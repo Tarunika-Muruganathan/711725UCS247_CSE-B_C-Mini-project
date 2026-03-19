@@ -30,6 +30,8 @@
     void displayAll(FILE *fPtr);
     int isValidDOB(char *dob);
     void clearBuffer();
+    void deposit(FILE *fPtr);
+    void withdraw(FILE *fPtr);
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -132,6 +134,14 @@
             // display if user does not select valid choice
             default:
                 puts("Incorrect choice");
+                break;
+            // deposit money
+            case 8:
+                deposit(cfPtr);
+                break;
+            // withdraw money
+            case 9:
+                withdraw(cfPtr);
                 break;
             } // end switch
         }     // end while
@@ -247,6 +257,118 @@
             fwrite(&client, sizeof(struct clientData), 1, fPtr);
         } // end else
     } // end function updateRecord
+
+    void deposit(FILE *fPtr)
+    {
+        unsigned int account;
+        double amount;
+
+        struct clientData client = {0, "", "", "", "", "", 0.0};
+        
+        printf("Enter account number: ");
+        scanf("%u", &account);
+        
+        if (account < 1 || account > 100)
+        {
+            printf("Invalid account number!\n");
+            return;
+        }
+
+        fseek(fPtr, (account - 1) * sizeof(struct clientData), SEEK_SET);
+        fread(&client, sizeof(struct clientData), 1, fPtr);
+        
+        if (client.acctNum == 0)
+        {
+            printf("Account not found!\n");
+            return;
+        }
+
+        // PIN CHECK
+        int enteredPin;
+        printf("Enter PIN: ");
+        scanf("%d", &enteredPin);
+
+        if (enteredPin != client.pin)
+        {
+            printf("Incorrect PIN!\n");
+            return;
+        }
+
+        printf("Enter amount to deposit: ");
+        scanf("%lf", &amount);
+
+        if (amount <= 0)
+        {
+            printf("Invalid amount!\n");
+            return;
+    }
+
+    client.balance += amount;
+
+    fseek(fPtr, -(long)sizeof(struct clientData), SEEK_CUR);
+    fwrite(&client, sizeof(struct clientData), 1, fPtr);
+
+    printf("Deposit successful! New balance: %.2f\n", client.balance);
+    }
+
+    void withdraw(FILE *fPtr)
+    {
+        unsigned int account;
+        double amount;
+
+        struct clientData client = {0, "", "", "", "", "", 0.0};
+
+        printf("Enter account number: ");
+        scanf("%u", &account);
+
+        if (account < 1 || account > 100)
+        {
+            printf("Invalid account number!\n");
+            return;
+        }
+
+        fseek(fPtr, (account - 1) * sizeof(struct clientData), SEEK_SET);
+        fread(&client, sizeof(struct clientData), 1, fPtr);
+
+        if (client.acctNum == 0)
+        {
+            printf("Account not found!\n");
+            return;
+        }
+
+        // PIN CHECK
+        int enteredPin;
+        printf("Enter PIN: ");
+        scanf("%d", &enteredPin);
+
+        if (enteredPin != client.pin)
+        {
+            printf("Incorrect PIN!\n");
+            return;
+        }
+
+        printf("Enter amount to withdraw: ");
+        scanf("%lf", &amount);
+
+        if (amount <= 0)
+        {
+            printf("Invalid amount!\n");
+            return;
+        }
+
+        if (client.balance < amount)
+        {
+            printf("Insufficient balance!\n");
+            return;
+        }
+
+        client.balance -= amount;
+
+        fseek(fPtr, -(long)sizeof(struct clientData), SEEK_CUR);
+        fwrite(&client, sizeof(struct clientData), 1, fPtr);
+
+        printf("Withdrawal successful! Remaining balance: %.2f\n", client.balance);
+    }
 
     // delete an existing record
     void deleteRecord(FILE *fPtr)
@@ -446,7 +568,9 @@
                     "4 - delete an account\n"
                     "5 - end program\n"
                     "6 - search an account\n"
-                    "7 - display all accounts\n? ");
+                    "7 - display all accounts\n"
+                    "8 - deposit money\n"
+                    "9 - withdraw money\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;

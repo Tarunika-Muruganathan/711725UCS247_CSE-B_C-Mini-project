@@ -1,5 +1,6 @@
 Acct  Last Name       First Name Gender  DOB         Nationality       Balance
 1     John            Henry      Male    01/08/1971  Indian             550.65
-2     VM              Tarunika   Female  21/04/1995  Indian            3000.89
-5     Ramya           M          Female  02/04/1998  Indian            2000.00
-
+4     Patel           Kowshik    Male    07/10/1965  Indian            7000.00
+6646881                Indian                                              0.00
+1409286144arunika,                                                            0.00
+134217728�@                                                                0.00
