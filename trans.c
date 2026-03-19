@@ -609,6 +609,11 @@
             client.nationality,
             client.accountType,
             &client.balance);
+            
+            for (int i = 0; client.accountType[i]; i++)
+            {
+                client.accountType[i] = tolower(client.accountType[i]);
+            }
 
             if (strcmp(client.accountType, "savings") != 0 &&
             strcmp(client.accountType, "current") != 0 &&

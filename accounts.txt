@@ -1,2 +1,3 @@
 Acct  Last Name       First Name Gender  DOB         Nationality          Type
 1     Henry           John       Male    07/10/1965  Indian         savings           8000.00
+2     Patel           Kowshik    Male    01/08/1971  Indian         savings           5000.50
