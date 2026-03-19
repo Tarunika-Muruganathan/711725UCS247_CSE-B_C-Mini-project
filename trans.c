@@ -36,6 +36,7 @@
     void transfer(FILE *fPtr);
     void logTransaction(char *type, unsigned int acc1, unsigned int acc2, double amount, double balance);
     void viewTransactions();
+    void viewTransactionsByAccount();
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -154,6 +155,10 @@
             // view transaction history
             case 11:
                 viewTransactions();
+                break;
+            // view transactions by account
+            case 12:    
+                viewTransactionsByAccount();
                 break;
             } // end switch
         }     // end while
@@ -726,6 +731,54 @@
         fclose(fp);
     }
 
+    void viewTransactionsByAccount()
+    {
+        FILE *fp = fopen("transaction.txt", "r");
+
+        if (fp == NULL)
+        {
+            printf("No transaction history found.\n");
+            return;
+        }
+
+        unsigned int acc;
+        char line[200];
+        int found = 0;
+
+        printf("Enter account number: ");
+        scanf("%u", &acc);
+
+        printf("\n--- Transactions for Account %u ---\n", acc);
+
+        while (fgets(line, sizeof(line), fp) != NULL)
+        {
+            // check if account number exists in line
+            char search[20];
+            sprintf(search, "Acc %u", acc);
+
+            char searchFrom[25];
+            sprintf(searchFrom, "From Acc %u", acc);
+
+            char searchTo[25];
+            sprintf(searchTo, "To Acc %u", acc);
+
+            if (strstr(line, search) || strstr(line, searchFrom) || strstr(line, searchTo))
+            {
+                printf("%s", line);
+                found = 1;
+            }
+
+            if (!found)
+            {
+                printf("No transactions found for this account.\n");
+            }
+        }
+
+            printf("--- End ---\n");
+
+            fclose(fp);
+    }
+
     // enable user to input menu choice
     unsigned int enterChoice(void)
     {
@@ -743,7 +796,8 @@
                     "8 - deposit money\n"
                     "9 - withdraw money\n"
                     "10 - transfer money\n"
-                    "11 - view transaction history\n? ");
+                    "11 - view transaction history\n"
+                    "12 - view transactions by account\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
