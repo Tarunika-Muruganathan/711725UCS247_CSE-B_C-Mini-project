@@ -34,6 +34,8 @@
     void withdraw(FILE *fPtr);
     void initializeFile();
     void transfer(FILE *fPtr);
+    void logTransaction(char *type, unsigned int acc1, unsigned int acc2, double amount, double balance);
+    void viewTransactions();
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -148,6 +150,10 @@
             // transfer money
             case 10:
                 transfer(cfPtr);
+                break;
+            // view transaction history
+            case 11:
+                viewTransactions();
                 break;
             } // end switch
         }     // end while
@@ -315,6 +321,7 @@
     fwrite(&client, sizeof(struct clientData), 1, fPtr);
 
     printf("Deposit successful! New balance: %.2f\n", client.balance);
+    logTransaction("DEPOSIT", account, 0, amount, client.balance);
     }
 
     void withdraw(FILE *fPtr)
@@ -374,6 +381,7 @@
         fwrite(&client, sizeof(struct clientData), 1, fPtr);
 
         printf("Withdrawal successful! Remaining balance: %.2f\n", client.balance);
+        logTransaction("WITHDRAW", account, 0, amount, client.balance);
     }
 
     void transfer(FILE *fPtr)
@@ -461,6 +469,8 @@
 
         printf("Transfer successful!\n");
         printf("Sender new balance: %.2f\n", sender.balance);
+
+        logTransaction("TRANSFER", fromAcc, toAcc, amount, sender.balance);
     }
 
     // delete an existing record
@@ -668,6 +678,54 @@
         printf("File initialized successfully.\n");
     }
 
+    void logTransaction(char *type, unsigned int acc1, unsigned int acc2, double amount, double balance)
+    {
+        FILE *fp = fopen("transaction.txt", "a"); // append mode
+
+        if (fp == NULL)
+        {
+            printf("Error opening transaction file!\n");
+            return;
+        }
+
+        if (strcmp(type, "TRANSFER") == 0)
+        {
+            fprintf(fp, "TRANSFER: From Acc %u -> To Acc %u | Amount: %.2f\n",
+                acc1, acc2, amount);
+        }
+        else
+        {
+            fprintf(fp, "%s: Acc %u | Amount: %.2f | Balance: %.2f\n",
+                type, acc1, amount, balance);
+        }
+
+        fclose(fp);
+    }
+
+    void viewTransactions()
+    {
+        FILE *fp = fopen("transaction.txt", "r");
+
+        if (fp == NULL)
+        {
+            printf("No transaction history found.\n");
+            return;
+        }
+
+        char line[200];
+
+        printf("\n------ TRANSACTION HISTORY ------\n");
+
+        while (fgets(line, sizeof(line), fp) != NULL)
+        {
+            printf("%s", line);
+        }
+
+        printf("------ END OF HISTORY ------\n");
+
+        fclose(fp);
+    }
+
     // enable user to input menu choice
     unsigned int enterChoice(void)
     {
@@ -684,7 +742,8 @@
                     "7 - display all accounts\n"
                     "8 - deposit money\n"
                     "9 - withdraw money\n"
-                    "10 - transfer money\n? ");
+                    "10 - transfer money\n"
+                    "11 - view transaction history\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
