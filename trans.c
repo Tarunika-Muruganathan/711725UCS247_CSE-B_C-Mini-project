@@ -8,6 +8,7 @@
     #include <time.h>
     #define ADMIN_USER "admin"
     #define ADMIN_PASS "1234"
+    
     // clientData structure definition
     struct clientData
     {
@@ -171,38 +172,51 @@
     // create formatted text file for printing
     void textFile(FILE *readPtr)
     {
-        FILE *writePtr; // accounts.txt file pointer
-        int result;     // used to test whether fread read any bytes
-        // create clientData with default information
-        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
+        FILE *writePtr;
+        struct clientData client;
 
-        // fopen opens the file; exits if file cannot be opened
         if ((writePtr = fopen("accounts.txt", "w")) == NULL)
         {
             puts("File could not be opened.");
-        } // end if
-        else
+            return;
+        }
+
+        rewind(readPtr);
+
+        // TOP BORDER
+        fprintf(writePtr, "============================================================================================================\n");
+
+        // HEADER
+        fprintf(writePtr, "| %-4s | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %-10s |\n",
+            "Acct", "Last Name", "First Name", "Gender", "DOB", "Nationality", "Type", "Balance");
+
+        // SEPARATOR
+        fprintf(writePtr, "============================================================================================================\n");
+
+        // DATA
+        while (fread(&client, sizeof(struct clientData), 1, readPtr) == 1)
         {
-            rewind(readPtr); // sets pointer to beginning of file
-            fprintf(writePtr, "%-6s%-16s%-11s%-8s%-12s%-15s%10s\n",
-            "Acct","Last Name","First Name","Gender","DOB","Nationality","Type","Balance");
-            // copy all records from random-access file into text file
-            while (!feof(readPtr))
+            if (client.acctNum != 0)
             {
-                result = fread(&client, sizeof(struct clientData), 1, readPtr);
+                fprintf(writePtr, "| %-4d | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %10.2f |\n",
+                    client.acctNum,
+                    client.lastName,
+                    client.firstName,
+                    client.gender,
+                    client.dob,
+                    client.nationality,
+                    client.accountType,
+                    client.balance);
+            }
+        }
 
-                // write single record to text file
-                if (result != 0 && client.acctNum != 0)
-                {
-                    fprintf(writePtr, "%-6d%-16s%-11s%-8s%-12s%-15s%-15s%10.2f\n",
-            client.acctNum, client.lastName, client.firstName,
-            client.gender, client.dob, client.nationality, client.accountType, client.balance);
-                } // end if
-            }     // end while
+        // BOTTOM BORDER
+        fprintf(writePtr, "============================================================================================================\n");
 
-            fclose(writePtr); // fclose closes the file
-        }                     // end else
-    } // end function textFile
+        fclose(writePtr);
+
+        printf("accounts.txt created successfully!\n"); // DEBUG MESSAGE
+    }
 
     // update balance in record
     void updateRecord(FILE *fPtr)
