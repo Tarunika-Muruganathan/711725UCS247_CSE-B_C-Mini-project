@@ -16,7 +16,8 @@
         char firstName[10];
         char gender[10];        // ADD
         char dob[12];           // ADD (DD/MM/YYYY)
-        char nationality[20];   
+        char nationality[20];  // ADD nationality of account holder
+        char accountType[20];  // ADD (e.g. Savings, Checking)
         double balance;       // account balance
         int pin;               //pin number for authentication (ADD)
     };                        // end structure clientData
@@ -173,7 +174,7 @@
         FILE *writePtr; // accounts.txt file pointer
         int result;     // used to test whether fread read any bytes
         // create clientData with default information
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
 
         // fopen opens the file; exits if file cannot be opened
         if ((writePtr = fopen("accounts.txt", "w")) == NULL)
@@ -184,7 +185,7 @@
         {
             rewind(readPtr); // sets pointer to beginning of file
             fprintf(writePtr, "%-6s%-16s%-11s%-8s%-12s%-15s%10s\n",
-            "Acct","Last Name","First Name","Gender","DOB","Nationality","Balance");
+            "Acct","Last Name","First Name","Gender","DOB","Nationality","Type","Balance");
             // copy all records from random-access file into text file
             while (!feof(readPtr))
             {
@@ -193,9 +194,9 @@
                 // write single record to text file
                 if (result != 0 && client.acctNum != 0)
                 {
-                    fprintf(writePtr, "%-6d%-16s%-11s%-8s%-12s%-15s%10.2f\n",
+                    fprintf(writePtr, "%-6d%-16s%-11s%-8s%-12s%-15s%-15s%10.2f\n",
             client.acctNum, client.lastName, client.firstName,
-            client.gender, client.dob, client.nationality, client.balance);;
+            client.gender, client.dob, client.nationality, client.accountType, client.balance);
                 } // end if
             }     // end while
 
@@ -209,7 +210,7 @@
         unsigned int account; // account number
         double transaction;   // transaction amount
         // create clientData with no information
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
 
         // obtain number of account to update
         printf("%s", "Enter account to update ( 1 - 100 ): ");
@@ -281,7 +282,7 @@
         unsigned int account;
         double amount;
 
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
         
         printf("Enter account number: ");
         scanf("%u", &account);
@@ -335,7 +336,7 @@
         unsigned int account;
         double amount;
 
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
 
         printf("Enter account number: ");
         scanf("%u", &account);
@@ -483,7 +484,7 @@
     void deleteRecord(FILE *fPtr)
     {
         struct clientData client;                       // stores record read from file
-        struct clientData blankClient = {0, "", "", "", "", "", 0.0}; // blank client
+        struct clientData blankClient = {0, "", "", "", "", "", "", 0.0, 0}; // blank client
         unsigned int accountNum;                        // account number
 
         // obtain number of account to delete
@@ -528,7 +529,7 @@
     void searchRecord(FILE *fPtr)
     {
         unsigned int acc;
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
 
         printf("Enter account number to search (1-100): ");
         scanf("%u",&acc);
@@ -558,13 +559,14 @@
             }
 
             // ✅ Only show details if PIN is correct
-            printf("\n%d %s %s %s %s %s %.2f\n",
+            printf("\n%d %s %s %s %s %s %s %.2f\n",
             client.acctNum,
             client.lastName,
             client.firstName,
             client.gender,
             client.dob,
             client.nationality,
+            client.accountType,
             client.balance);
         }
     }
@@ -574,7 +576,7 @@
     void newRecord(FILE *fPtr)
     {
         // create clientData with default information
-        struct clientData client = {0, "", "", "", "", "", 0.0};
+        struct clientData client = {0, "", "", "", "", "", "", 0.0, 0};
         unsigned int accountNum; // account number
 
         // obtain number of account to create
@@ -598,14 +600,24 @@
         else
         { // create record
             // user enters last name, first name and balance
-            printf("Enter lastname firstname gender DOB nationality balance\n");
-            scanf("%14s %9s %9s %11s %19s %lf",
+            printf("Enter lastname firstname gender DOB nationality accountType balance\n");
+            scanf("%14s %9s %9s %11s %19s %19s %lf",
             client.lastName,
             client.firstName,
             client.gender,
             client.dob,
             client.nationality,
+            client.accountType,
             &client.balance);
+
+            if (strcmp(client.accountType, "savings") != 0 &&
+            strcmp(client.accountType, "current") != 0 &&
+            strcmp(client.accountType, "student") != 0 &&
+            strcmp(client.accountType, "senior") != 0)
+            {
+                printf("Invalid account type!\n");
+            return;
+            }
 
             if (!isValidDOB(client.dob)){
                 printf("Invalid DOB format! Use DD/MM/YYYY\n");
@@ -653,13 +665,14 @@
         while(fread(&client,sizeof(struct clientData),1,fPtr))
         {
             if(client.acctNum!=0)
-                printf("%d %s %s %s %s %s %.2f\n",
+                printf("%d %s %s %s %s %s %s %.2f\n",
         client.acctNum,
         client.lastName,
         client.firstName,
         client.gender,
         client.dob,
         client.nationality,
+        client.accountType,
         client.balance);
         }
     }
@@ -673,7 +686,7 @@
             return;
         }
 
-        struct clientData blank = {0, "", "", "", "", "", 0.0, 0};
+            struct clientData blank = {0, "", "", "", "", "", "", 0.0, 0};
 
         for (int i = 0; i < 100; i++)
         {
