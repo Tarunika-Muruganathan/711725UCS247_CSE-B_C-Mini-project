@@ -256,14 +256,16 @@
                 return;
             }
             // update record
-            printf("%d %s %s %s %s %s %.2f\n\n",
-        client.acctNum,
-        client.lastName,
-        client.firstName,
-        client.gender,
-        client.dob,
-        client.nationality,
-        client.balance);
+            printf("\n--- BEFORE UPDATE ---\n");
+            printf("| %-4d | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %10.2f |\n",
+            client.acctNum,
+            client.lastName,
+            client.firstName,
+            client.gender,
+            client.dob,
+            client.nationality,
+            client.accountType,
+            client.balance);
 
             // request transaction amount from user
             printf("%s", "Enter charge ( + ) or payment ( - ): ");
@@ -274,15 +276,16 @@
             }
             client.balance += transaction; // update record balance
 
-            printf("%d %s %s %s %s %s %.2f\n\n",
-        client.acctNum,
-        client.lastName,
-        client.firstName,
-        client.gender,
-        client.dob,
-        client.nationality,
-        client.balance);
-
+            printf("\n--- AFTER UPDATE ---\n");
+            printf("| %-4d | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %10.2f |\n",
+            client.acctNum,
+            client.lastName,
+            client.firstName,
+            client.gender,
+            client.dob,
+            client.nationality,
+            client.accountType,
+            client.balance);
             // move file pointer to correct record in file
             // move back by 1 record length
             fseek(fPtr, -(long int)sizeof(struct clientData), SEEK_CUR);
@@ -573,7 +576,12 @@
             }
 
             // ✅ Only show details if PIN is correct
-            printf("\n%d %s %s %s %s %s %s %.2f\n",
+            printf("\n============================================================================================================\n");
+            printf("| %-4s | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %-10s |\n",
+                "Acct", "Last Name", "First Name", "Gender", "DOB", "Nationality", "Type", "Balance");
+            printf("============================================================================================================\n");
+
+            printf("| %-4d | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %10.2f |\n",
             client.acctNum,
             client.lastName,
             client.firstName,
@@ -582,6 +590,7 @@
             client.nationality,
             client.accountType,
             client.balance);
+            printf("============================================================================================================\n");
         }
     }
 
@@ -680,21 +689,27 @@
         rewind(fPtr);
 
         printf("\nExisting Accounts:\n");
+        printf("\n============================================================================================================\n");
+        printf("| %-4s | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %-10s |\n",
+           "Acct", "Last Name", "First Name", "Gender", "DOB", "Nationality", "Type", "Balance");
+        printf("============================================================================================================\n");
 
         while(fread(&client,sizeof(struct clientData),1,fPtr))
         {
             if(client.acctNum!=0)
-                printf("%d %s %s %s %s %s %s %.2f\n",
-        client.acctNum,
-        client.lastName,
-        client.firstName,
-        client.gender,
-        client.dob,
-        client.nationality,
-        client.accountType,
-        client.balance);
+                printf("| %-4d | %-14s | %-11s | %-6s | %-10s | %-13s | %-10s | %10.2f |\n",
+                   client.acctNum,
+                   client.lastName,
+                   client.firstName,
+                   client.gender,
+                   client.dob,
+                   client.nationality,
+                   client.accountType,
+                   client.balance);
         }
+        printf("============================================================================================================\n");
     }
+    
 
     void initializeFile()
     {
