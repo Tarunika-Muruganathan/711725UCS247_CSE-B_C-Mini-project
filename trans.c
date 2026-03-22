@@ -966,4 +966,4 @@
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
-    } // end function 
+    } // end function enterChoice
