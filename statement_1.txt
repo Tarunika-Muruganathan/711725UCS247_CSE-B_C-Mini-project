@@ -1,0 +1,14 @@
+=============================================
+         BANK ACCOUNT STATEMENT              
+=============================================
+Account Number : 1
+Name           : John Henry
+Gender         : Male
+DOB            : 07/10/1965
+Nationality    : Indian
+Account Type   : savings
+Current Balance: 9900.00
+
+------------ TRANSACTIONS ------------
+[20/03/2026 11:52:46] TRANSFER: From Acc 1 -> To Acc 2 | Amount: 100.00
+=============================================

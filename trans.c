@@ -40,6 +40,7 @@
     void logTransaction(char *type, unsigned int acc1, unsigned int acc2, double amount, double balance);
     void viewTransactions();
     void viewTransactionsByAccount();
+    void generateStatement(FILE *fPtr);
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -162,6 +163,10 @@
             // view transactions by account
             case 12:    
                 viewTransactionsByAccount();
+                break;
+            // generate statement
+            case 13:
+                generateStatement(cfPtr);
                 break;
             } // end switch
         }     // end while
@@ -835,6 +840,109 @@
         fclose(fp);
     }
 
+    void generateStatement(FILE *fPtr)
+    {
+        unsigned int acc;
+        struct clientData client = {0};
+        FILE *fp;
+
+        printf("Enter account number: ");
+        scanf("%u", &acc);
+
+        if (acc < 1 || acc > 100)
+        {
+            printf("Invalid account number!\n");
+            return;
+        }
+
+        // FETCH ACCOUNT
+        fseek(fPtr, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+        fread(&client, sizeof(struct clientData), 1, fPtr);
+
+        if (client.acctNum == 0)
+        {
+            printf("Account not found!\n");
+            return;
+        }
+
+        // PIN CHECK
+        int enteredPin;
+        printf("Enter PIN: ");
+        scanf("%d", &enteredPin);
+
+        if (enteredPin != client.pin)
+        {
+            printf("Incorrect PIN!\n");
+            return;
+        }
+
+        // CREATE FILE
+        char filename[50];
+        sprintf(filename, "statement_%u.txt", acc);
+
+        fp = fopen(filename, "w");
+
+        if (fp == NULL)
+        {
+            printf("Error creating file!\n");
+            return;
+        }
+
+        fprintf(fp, "=============================================\n");
+        fprintf(fp, "         BANK ACCOUNT STATEMENT              \n");
+        fprintf(fp, "=============================================\n");
+
+        fprintf(fp, "Account Number : %u\n", client.acctNum);
+        fprintf(fp, "Name           : %s %s\n", client.firstName, client.lastName);
+        fprintf(fp, "Gender         : %s\n", client.gender);
+        fprintf(fp, "DOB            : %s\n", client.dob);
+        fprintf(fp, "Nationality    : %s\n", client.nationality);
+        fprintf(fp, "Account Type   : %s\n", client.accountType);
+        fprintf(fp, "Current Balance: %.2f\n", client.balance);
+
+        fprintf(fp, "\n------------ TRANSACTIONS ------------\n");
+
+        FILE *tf = fopen("transaction.txt", "r");
+
+        if (tf != NULL)
+        {
+            char line[200];
+            int found = 0;
+
+            while (fgets(line, sizeof(line), tf))
+            {
+                char s1[20], s2[25], s3[25];
+
+                sprintf(s1, "Acc %u", acc);
+                sprintf(s2, "From Acc %u", acc);
+                sprintf(s3, "To Acc %u", acc);
+
+                if (strstr(line, s1) || strstr(line, s2) || strstr(line, s3))
+                {
+                    fprintf(fp, "%s", line);
+                    found = 1;
+                }
+            }
+        
+
+        if (!found)
+            fprintf(fp, "No transactions found.\n");
+
+        fclose(tf);
+        }
+
+        else
+        {
+            fprintf(fp, "Transaction file not found.\n");
+        }
+
+        fprintf(fp, "=============================================\n");
+
+        fclose(fp);
+
+        printf("Statement generated: %s\n", filename);
+    }
+
     // enable user to input menu choice
     unsigned int enterChoice(void)
     {
@@ -853,7 +961,8 @@
                     "9 - withdraw money\n"
                     "10 - transfer money\n"
                     "11 - view transaction history\n"
-                    "12 - view transactions by account\n? ");
+                    "12 - view transactions by account\n"
+                    "13 - generate statement\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
