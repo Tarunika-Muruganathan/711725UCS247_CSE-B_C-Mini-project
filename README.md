@@ -6,7 +6,6 @@
 
 A **Bank Account Management System** built in C using **file handling and structured data storage**. This project simulates real-world banking operations such as account creation, transactions, authentication, and statement generation using a **random-access file system (********`credit.dat`************)**.
 
----** built in C using **file handling and structured data storage**. This project simulates real-world banking operations such as account creation, transactions, authentication, and statement generation using a **random-access file system (********`credit.dat`****************************)**.
 
 ---
 
