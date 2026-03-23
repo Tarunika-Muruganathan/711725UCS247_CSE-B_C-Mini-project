@@ -1,0 +1,14 @@
+=============================================
+         BANK ACCOUNT STATEMENT              
+=============================================
+Account Number : 3
+Name           : Ravi Kumar
+Gender         : Male
+DOB            : 21/08/2000
+Nationality    : Indian
+Account Type   : savings
+Current Balance: 5020.00
+
+------------ TRANSACTIONS ------------
+[23/03/2026 14:20:23] TRANSFER: From Acc 1 -> To Acc 3 | Amount: 20.00
+=============================================

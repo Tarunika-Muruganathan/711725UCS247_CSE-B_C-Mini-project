@@ -1,1 +1,2 @@
 [20/03/2026 11:52:46] TRANSFER: From Acc 1 -> To Acc 2 | Amount: 100.00
+[23/03/2026 14:20:23] TRANSFER: From Acc 1 -> To Acc 3 | Amount: 20.00
