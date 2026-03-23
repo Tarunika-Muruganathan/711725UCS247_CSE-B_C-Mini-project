@@ -19,9 +19,10 @@ Persistent data storage
 📄 Display all accounts
 
 🔍 Search account by ID
-
+F
 ✏️ Update account details
 
 ❌ Delete account
 
 💾 Data stored in file (accounts.txt)
+
