@@ -150,6 +150,8 @@ struct clientData
 ## 🔒 Security Features
 
 * Admin login required to access system
+ id: admin
+ pass: 1234
 * PIN verification for:
 
   * Deposit
