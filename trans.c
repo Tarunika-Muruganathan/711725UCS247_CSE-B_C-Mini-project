@@ -41,6 +41,7 @@
     void viewTransactions();
     void viewTransactionsByAccount();
     void generateStatement(FILE *fPtr);
+    void leaderboard(FILE *fPtr);
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -90,6 +91,20 @@
             printf("Invalid credentials!\n");
             return 0;
         }
+    }
+
+    int compareBalance(const void *a, const void *b)
+    {
+        struct clientData *c1 = (struct clientData *)a;
+        struct clientData *c2 = (struct clientData *)b;
+
+    // descending order
+        if (c2->balance > c1->balance)
+            return 1;
+        else if (c2->balance < c1->balance)
+            return -1;
+        else
+            return 0;
     }
 
     int main(int argc, char *argv[])
@@ -167,6 +182,10 @@
             // generate statement
             case 13:
                 generateStatement(cfPtr);
+                break;
+            //leaderboard based on balance
+            case 14:
+                leaderboard(cfPtr);
                 break;
             } // end switch
         }     // end while
@@ -715,6 +734,47 @@
         printf("============================================================================================================\n");
     }
     
+    void leaderboard(FILE *fPtr)
+    {
+        struct clientData clients[100];
+        int count = 0;
+
+        rewind(fPtr);
+
+        while (fread(&clients[count], sizeof(struct clientData), 1, fPtr) == 1)
+        {
+            if (clients[count].acctNum != 0)
+            {
+                count++;
+            }
+        }
+
+        if (count == 0)
+        {
+            printf("No accounts found.\n");
+            return;
+        }
+
+        //SORTING 
+        qsort(clients, count, sizeof(struct clientData), compareBalance);
+
+        printf("\n=========== LEADERBOARD (Top Balances) ===========\n");
+        printf("===========================================================\n");
+        printf("| %-4s | %-14s | %-11s | %-10s |\n",
+           "Rank", "Last Name", "First Name", "Balance");
+        printf("===========================================================\n");
+
+        for (int i = 0; i < count; i++)
+        {
+            printf("| %-4d | %-14s | %-11s | %10.2f |\n",
+               i + 1,
+               clients[i].lastName,
+               clients[i].firstName,
+               clients[i].balance);
+        }
+
+        printf("===========================================================\n");
+    }
 
     void initializeFile()
     {
@@ -962,7 +1022,8 @@
                     "10 - transfer money\n"
                     "11 - view transaction history\n"
                     "12 - view transactions by account\n"
-                    "13 - generate statement\n? ");
+                    "13 - generate statement\n"
+                    "14 - show leaderboard\n? ");
 
         scanf("%u", &menuChoice); // receive choice from user
         return menuChoice;
