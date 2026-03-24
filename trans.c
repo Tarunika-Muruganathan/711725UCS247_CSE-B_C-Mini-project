@@ -6,8 +6,7 @@
     #include <string.h>
     #include <ctype.h>
     #include <time.h>
-    #define ADMIN_USER "admin"
-    #define ADMIN_PASS "1234"
+
     
     // clientData structure definition
     struct clientData
@@ -22,6 +21,12 @@
         double balance;       // account balance
         int pin;               //pin number for authentication (ADD)
     };                        // end structure clientData
+
+    struct adminData
+    {
+        char username[20];
+        char password[20];
+    };
 
     // prototypes
     unsigned int enterChoice(int role);
@@ -42,6 +47,7 @@
     void viewTransactionsByAccount();
     void generateStatement(FILE *fPtr);
     void leaderboard(FILE *fPtr);
+    void initializeAdmin();
 
     // ------------------ HELPER FUNCTIONS ------------------
 
@@ -72,6 +78,18 @@
     int login()
     {
         char user[20], pass[20];
+        struct adminData admin;
+
+        FILE *fp = fopen("admin.dat", "rb");
+
+        if (fp == NULL)
+        {
+            printf("Admin file not found!\n");
+            return 0;
+        }
+
+        fread(&admin, sizeof(struct adminData), 1, fp);
+        fclose(fp);
 
         printf("\n--- Admin Login ---\n");
 
@@ -81,7 +99,8 @@
         printf("Password: ");
         scanf("%19s", pass);
 
-        if (strcmp(user, ADMIN_USER) == 0 && strcmp(pass, ADMIN_PASS) == 0)
+        if (strcmp(user, admin.username) == 0 &&
+            strcmp(pass, admin.password) == 0)
         {
             printf("Login successful!\n");
             return 1;
@@ -92,7 +111,7 @@
             return 0;
         }
     }
-
+    
     int compareBalance(const void *a, const void *b)
     {
         struct clientData *c1 = (struct clientData *)a;
@@ -105,6 +124,33 @@
             return -1;
         else
             return 0;
+    }
+
+    void initializeAdmin()
+    {
+        FILE *fp = fopen("admin.dat", "rb");
+
+        if (fp != NULL)
+        {
+            fclose(fp);
+            return; // already exists
+        }
+
+        fp = fopen("admin.dat", "wb");
+
+        struct adminData admin;
+
+        printf("Set initial admin username: ");
+        scanf("%19s", admin.username);
+
+        printf("Set initial admin password: ");
+        scanf("%19s", admin.password);
+
+        fwrite(&admin, sizeof(struct adminData), 1, fp);
+
+        fclose(fp);
+
+        printf("Admin credentials saved successfully!\n");
     }
 
     int main(int argc, char *argv[])
@@ -125,6 +171,8 @@
 
         printf("Select role: ");
         scanf("%d", &role);
+
+        initializeAdmin();
 
         if (role == 1)
         {
