@@ -24,7 +24,7 @@
     };                        // end structure clientData
 
     // prototypes
-    unsigned int enterChoice(void);
+    unsigned int enterChoice(int role);
     void textFile(FILE *readPtr);
     void updateRecord(FILE *fPtr);
     void newRecord(FILE *fPtr);
@@ -112,13 +112,39 @@
         FILE *cfPtr;         // credit.dat file pointer
         unsigned int choice; // user's choice
 
-        // LOGIN CHECK (ADD HERE)
-        if (!login())
+        int role;
+
+        printf("\n=====================================================\n");
+        printf("            BANK MANAGEMENT SYSTEM\n");
+        printf("=====================================================\n");
+
+        printf("\n-------------------- LOGIN ---------------------------\n");
+        printf("1) ADMIN\n");
+        printf("2) USER\n");
+        printf("-----------------------------------------------------\n");
+
+        printf("Select role: ");
+        scanf("%d", &role);
+
+        if (role == 1)
         {
-            printf("Access denied!\n");
+            if (!login())
+            {
+                printf("Access denied!\n");
+                return 0;
+            }
+        printf("Admin access granted.\n");
+        }
+        else if (role == 2)
+        {
+            printf("User access granted.\n");
+        }
+        else
+        {
+            printf("Invalid choice!\n");
             return 0;
         }
-
+    
         // fopen opens the file; exits if file cannot be opened
         if ((cfPtr = fopen("credit.dat", "rb+")) == NULL)
         {
@@ -126,66 +152,63 @@
             cfPtr = fopen("credit.dat", "rb+");
         }
 
-        // enable user to specify action
-        while ((choice = enterChoice()) != 5)
+        // enable to enter choice
+        while ((choice = enterChoice(role)) != 5)
         {
             switch (choice)
             {
-            // create text file from record file
+            // ---------------- ADMIN ONLY ----------------
             case 1:
-                textFile(cfPtr);
-                break;
-            // update record
             case 2:
-                updateRecord(cfPtr);
-                break;
-            // create record
             case 3:
-                newRecord(cfPtr);
-                break;
-            // delete existing record
             case 4:
-                deleteRecord(cfPtr);
+            case 7:
+            case 14:
+                if (role != 1)
+                {
+                    printf("Access denied! Admin only.\n");
+                    break;
+                }
+
+                if (choice == 1) textFile(cfPtr);
+                else if (choice == 2) updateRecord(cfPtr);
+                else if (choice == 3) newRecord(cfPtr);
+                else if (choice == 4) deleteRecord(cfPtr);
+                else if (choice == 7) displayAll(cfPtr);
+                else if (choice == 14) leaderboard(cfPtr);
                 break;
-            // search for a record
+
+            // ---------------- BOTH (ADMIN + USER) ----------------
             case 6:
                 searchRecord(cfPtr);
                 break;
-            // display all records
-            case 7:
-                displayAll(cfPtr);
-                break;
-            // display if user does not select valid choice
-            default:
-                puts("Incorrect choice");
-                break;
-            // deposit money
+
             case 8:
                 deposit(cfPtr);
                 break;
-            // withdraw money
+
             case 9:
                 withdraw(cfPtr);
                 break;
-            // transfer money
+
             case 10:
                 transfer(cfPtr);
                 break;
-            // view transaction history
+
             case 11:
                 viewTransactions();
                 break;
-            // view transactions by account
-            case 12:    
+
+            case 12:
                 viewTransactionsByAccount();
                 break;
-            // generate statement
+
             case 13:
                 generateStatement(cfPtr);
                 break;
-            //leaderboard based on balance
-            case 14:
-                leaderboard(cfPtr);
+
+            default:
+                printf("Invalid choice!\n");
                 break;
             } // end switch
         }     // end while
@@ -1003,29 +1026,44 @@
         printf("Statement generated: %s\n", filename);
     }
 
-    // enable user to input menu choice
-    unsigned int enterChoice(void)
+    // enable to input menu choice
+    unsigned int enterChoice(int role)
     {
-        unsigned int menuChoice; // variable to store user's choice
-        // display available options
-        printf("%s", "\nEnter your choice\n"
-                    "1 - store a formatted text file of accounts called\n"
-                    "    \"accounts.txt\" for printing\n"
-                    "2 - update an account\n"
-                    "3 - add a new account\n"
-                    "4 - delete an account\n"
-                    "5 - end program\n"
-                    "6 - search an account\n"
-                    "7 - display all accounts\n"
-                    "8 - deposit money\n"
-                    "9 - withdraw money\n"
-                    "10 - transfer money\n"
-                    "11 - view transaction history\n"
-                    "12 - view transactions by account\n"
-                    "13 - generate statement\n"
-                    "14 - show leaderboard\n? ");
+        unsigned int menuChoice;
 
-        scanf("%u", &menuChoice); // receive choice from user
+        if (role == 1) // ADMIN MENU
+        {
+            printf("\n--- ADMIN MENU ---\n");
+            printf("1 - store accounts to text file\n");
+            printf("2 - update account\n");
+            printf("3 - add new account\n");
+            printf("4 - delete account\n");
+            printf("5 - end program\n");
+            printf("6 - search account\n");
+            printf("7 - display all accounts\n");
+            printf("8 - deposit\n");
+            printf("9 - withdraw\n");
+            printf("10 - transfer\n");
+            printf("11 - view all transactions\n");
+            printf("12 - view transactions by account\n");
+            printf("13 - generate statement\n");
+            printf("14 - leaderboard\n");
+        }
+        else // USER MENU
+        {
+            printf("\n--- USER MENU ---\n");
+            printf("5 - end program\n");
+            printf("6 - search your account\n");
+            printf("8 - deposit\n");
+            printf("9 - withdraw\n");
+            printf("10 - transfer\n");
+            printf("11 - view transactions\n");
+            printf("12 - view your transactions\n");
+            printf("13 - generate statement\n");
+        }
+
+        printf("Enter your choice: ");
+        scanf("%u", &menuChoice);
+
         return menuChoice;
-        
     } // end function enterChoice
