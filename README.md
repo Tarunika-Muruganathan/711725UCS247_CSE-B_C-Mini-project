@@ -142,6 +142,7 @@ struct clientData
 11 - View all transactions
 12 - View transactions by account
 13 - Generate account statement
+14 - Leaderboard
 ```
 
 ---
